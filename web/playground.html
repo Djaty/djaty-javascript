@@ -1,0 +1,269 @@
+<!doctype html >
+<html class="no-js" lang="" >
+  <!-- you should put jsAgentInitLib first script in the page and put his configuration next one
+  like URL or custom Cb -->
+  <script src="scripts/config.js"></script>
+  <script src="scripts/constants.js"></script>
+  <script src="scripts/initUtils.js"></script>
+  <script src="scripts/logger.js"></script>
+  <script src="scripts/jsAgentInitLib.js"></script>
+  <script>
+    Djaty.init({
+      apiKey: 'johndjaty',
+      apiUrl: 'https://dev.djaty.com',
+      bugsURL: 'https://bugs.dev.djaty.com',
+      cdnPath: 'https://cdn.dev.djaty.com',
+      mode: 'full',
+      user: {
+        userId: 1111,
+      },
+	    tags: ['tag1'],
+	    stage: Djaty.constants.defaultStages.DEV,
+      allowAutoSubmission: true,
+      trackingOptions: {
+        removeSecretData: false,
+        cookies: true,
+        localStorage: true,
+        ajax: {
+          headers: false,
+          cookies: true,
+          queryParams: true,
+        },
+        console: {
+          excludedMethods : ['profile', 'info'],
+          repetitionCount: true,
+        },
+        navigation: false,
+        form: true,
+      },
+      release: '01.12.01',
+      debug: true,
+      onBeforeBugSubmission: (djatyBugReport, next) => {
+        djatyBugReport.addCustomDataCb(() => 'test custom data');
+        next(djatyBugReport);
+      },
+      ignoreTimelineItem: (item, utils) => {
+        utils.console.log('For debugging purpose');
+        return item.itemType === 'console' && item.consoleParams[0] === 'Debug object';
+      },
+      ignoredErrors: ['localhost:9000/scripts/tracking/prodMain.js', 'Error object', 'http://localhost:8089',
+        "TypeError: Cannot read property 'src' of"],
+    });
+  </script>
+  <head>
+    <!-- build:js scripts/vendor.js -->
+    <!-- bower:js -->
+    <!-- endbower -->
+    <!-- endbuild -->
+
+    <!-- build:js jsAgentCoreDjaty.js -->
+    <script src="scripts/libWrapper.js"></script>
+    <script src="scripts/utils.js"></script>
+    <script src="scripts/browserData.js"></script>
+    <script src="scripts/buffer.js"></script>
+    <script src="scripts/throttling.js"></script>
+    <script src="scripts/tracking/djaty.js" djaty-app></script>
+    <script src="scripts/tracking/memoryStorage.js"></script>
+    <script src="scripts/tracking/localStorage.js"></script>
+    <script src="scripts/tracking/localStorageWrapper.js"></script>
+    <script src="scripts/tracking/ajaxTracking.js"></script>
+    <script src="scripts/tracking/consoleTracking.js"></script>
+    <script src="scripts/tracking/formTracking.js"></script>
+    <script src="scripts/tracking/fileTracking.js"></script>
+    <script src="scripts/tracking/exceptionTracker.js"></script>
+    <script src="scripts/tracking/navigationTracker.js"></script>
+    <script src="scripts/autoReport.js"></script>
+    <!-- endbuild -->
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>playground</title>
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <script type="text/javascript" charset="utf-8" src="test.js"></script>
+    <script src="scrin.js"></script>
+    <script
+      src="https://code.jquery.com/jquery-3.2.1.min.js"
+      integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+      crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+    function hh(){
+      ss().x();
+    }
+
+
+    function gg(){
+      ff();
+    }
+
+
+    function ff(){
+      dd();
+    }
+
+
+    function dd(){
+      ss();
+    }
+
+    function ss(){
+      return {
+        x: function () {
+          let x = true ? document.getElementById('aewweew').src : 0;
+        }
+      }
+    }
+
+    function hh(){
+      ss().x();
+    }
+
+
+    function gg(){
+      ff();
+    }
+
+
+    function ff(){
+      dd();
+    }
+
+
+    function dd(){
+      ss();
+    }
+
+    function ss(){
+      return {
+        x: function () {
+          let x = true ? document.getElementById('aewweew').src : 0;
+        }
+      }
+    }
+    $.ajax({type: 'GET', url: 'http://localhost:8080'});
+    $.ajax({type: 'GET', url: 'http://localhost:8089'});
+    $.ajax({type: 'GET', url: 'http://localhost:8080', data: {name:'sdadd', test:'sdaadas'}});
+    $.ajax({type: 'GET', url: 'http://localhost:8089', data: {name:'sdadd', test:'sdaadas'}});
+    $.ajax({type: 'POST', url: 'http://localhost:8080', data: {name:'sdadd', test:'sdaadas'}});
+    $.ajax({type: 'POST', url: 'http://localhost:8089', data: {name:'sdadd', test:'sdaadas'}});
+
+    [1,2].forEach(() => Djaty.trackBug(new Error('test counter')));
+    const testObj = {id:1, name:' Test Name'};
+    console.log('Log object', testObj);
+    console.log('Log object', testObj);
+    console.warn('Warn object', testObj);
+    console.debug('Debug object', testObj);
+    console.error('Error object', testObj);
+    console.dir(testObj, 'Dir object');
+    console.info('Info  object', testObj);
+
+    setTimeout(function(){
+      hh();
+    },1000);
+
+    hh();
+    </script>
+    <link rel="stylesheet" type="text/css" href="adasdsd.css">
+  </head>
+  <body>
+    <!--[if lt IE 10]>
+      <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <div class="container">
+      <div class="header">
+        <ul class="nav nav-pills pull-right">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+        <h3 class="text-muted">playground</h3>
+      </div>
+
+      <div class="jumbotron">
+        <h1>'Allo, 'Allo!</h1>
+        <p class="lead">Always a pleasure scaffolding your apps.</p>
+        <p><a class="btn btn-lg btn-success" href="#">Splendid!</a></p>
+      </div>
+
+      <div class="row marketing">
+        <div class="col-lg-6">
+          <h4>HTML5 Boilerplate</h4>
+          <p>HTML5 Boilerplate is a professional front-end template for building fast, robust, and adaptable web apps or sites.</p>
+
+          <h4>Sass</h4>
+          <p>Sass is the most mature, stable, and powerful professional grade CSS extension language in the world.</p>
+
+          <h4>Bootstrap</h4>
+          <p>Sleek, intuitive, and powerful mobile first front-end framework for faster and easier web development.</p>
+          <h4>Modernizr</h4>
+          <p>Modernizr is an open-source JavaScript library that helps you build the next generation of HTML5 and CSS3-powered websites.</p>
+
+        </div>
+      </div>
+
+      <div class="footer">
+        <p>♥ from the Yeoman team</p>
+      </div>
+    </div>
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+    <script>
+      (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
+      function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
+      e=o.createElement(i);r=o.getElementsByTagName(i)[0];
+      e.src='https://www.google-analytics.com/analytics.js';
+      r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
+      ga('create','UA-XXXXX-X');ga('send','pageview');
+    </script>
+
+    <img id="test" src="https://picdomain.com/abc.png"/>
+    <img id="test" src="https://www.typescriptlang.org/docs/handbook/images/font-awesome_search.png"/>
+  <input type="image" name="image" src="/files/2917/fxlogo.png" width="50">
+  <audio controls="">
+    <source src="http://www.w3se.com/video.ogg" type="audio/ogg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <audio src="asdasd.ogg"></audio>
+
+  <video width="400" controls>
+    <source src="v_bbb.mp4" type="video/mp4">
+    Your browser does not support HTML5 video.
+  </video>
+
+  <video width="400" src="mov_bbb.mp4"></video>
+  <!-- <iframe width="560" height="315" src="https://www.youstube.com/embed/fBVMnq8DWSQ" frameborder="0" allowfullscreen ></iframe> -->
+  <!-- <object width="400" height="400" data="helloworld.swf"></object> -->
+  <!-- <embed width="400" height="400" data="helloworld.swf"></embed>
+  <object width="400" height="400" data="http://www.w3schools.com/tags/helloworld.swf"></object> -->
+  <!-- aaaaaaaaaaaaaaaaaaaaaaa -->
+  <form id="TheForm" action="" method="post" onsubmit="return false;">
+    <input type="password" name="password" value="">
+    <input type="text" name="text" value="">
+    <input type="file" name="dfgdfg" value="">
+    <select name="cars" multiple>
+      <option value="volvo">Volvo</option>
+      <option value="saab">Saab</option>
+      <option value="opel">Opel</option>
+      <option value="audi">Audi</option>
+    </select><br>
+    <select name="cars">
+      <option value="volvo">Volvo</option>
+      <option value="saab">Saab</option>
+      <option value="opel">Opel</option>
+      <option value="audi">Audi</option>
+    </select><br>
+    <input type="radio" name="gender" value="male"> Male<br>
+    <input type="radio" name="gender" value="female"> Female<br>
+    <input type="radio" name="gender" value="other"> Other<br>
+    <input type="checkbox" name="vehicle1" value="Bike"> I have a bike<br>
+    <input type="checkbox" name="vehicle2" value="Car"> I have a car<br>
+    <input type="checkbox" name="vehicle3" value="Boat" checked> I have a boat<br>
+    <input type="submit" name="name" value="asdasdasd">
+  </form>
+
+  </body>
+</html>

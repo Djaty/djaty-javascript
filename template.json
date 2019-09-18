@@ -1,0 +1,652 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Pipeline using CodePipeline and CodeBuild for continuous delivery of dist files to S3",
+    "Parameters": {
+        "DistBucketName": {
+            "Type": "String",
+            "Description": "Name of the bucket that should host the dist files"
+        },
+        "RepoDistPath": {
+            "Type": "String",
+            "Description": "Path of the directory that contains the repo dist files",
+            "Default": "dist"
+        },
+        "BucketDistPath": {
+            "Type": "String",
+            "Description": "Path of the directory that will contain the dist files"
+        },
+        "shouldCreateS3Bucket": {
+            "Type": "String",
+            "Description": "Should create an S3 bucket?",
+            "Default": "false"
+        },
+        "CurrentCloudFrontDistributionId": {
+          "Type": "String",
+          "Description": "ID of the current CloudFront distribution."
+        },
+        "HostedZoneId": {
+            "Type": "String",
+            "Default": "ZZZZZZZZZZZZZZZ"
+        },
+        "DomainName": {
+            "Type": "String",
+            "Default": "cdn.example.com"
+        },
+        "GitHubUser": {
+            "Type": "String",
+            "Description": "GitHub User",
+            "Default": "djaty"
+        },
+        "GitHubRepo": {
+            "Type": "String",
+            "Description": "GitHub Repo to pull from. Only the Name. not the URL",
+            "Default": "djaty-"
+        },
+        "GitHubBranch": {
+            "Type": "String",
+            "Description": "GitHub Branch",
+            "Default": "master"
+        },
+        "GitHubToken": {
+            "NoEcho": true,
+            "Type": "String",
+            "Description": "Token to control webhooks of the repo and read/write at the repo. It might look something like 9b189a1654643522561f7b3ebd44a1531a4287af OAuthToken with access to Repo. Go to https://github.com/settings/tokens"
+        },
+        "BuildType": {
+            "Type": "String",
+            "Default": "LINUX_CONTAINER",
+            "Description": "The build container type to use for building the app"
+        },
+        "BuildComputeType": {
+            "Type": "String",
+            "Default": "BUILD_GENERAL1_SMALL",
+            "Description": "The build compute type to use for building the app"
+        },
+        "BuildTimeoutInMinutes": {
+            "Type": "Number",
+            "Default": "10",
+            "Description": "The build timeout in minutes to use when building"
+        },
+        "BuildImage": {
+            "Type": "String",
+            "Default": "aws/codebuild/standard:2.0",
+            "Description": "The build image to use for building the app"
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "Site Configuration"
+                    },
+                    "Parameters": [
+                        "DistBucketName",
+                        "RepoDistPath",
+                        "BucketDistPath",
+                        "shouldCreateS3Bucket",
+                        "CurrentCloudFrontDistributionId",
+                        "DomainName",
+                        "HostedZoneId"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "GitHub Configuration"
+                    },
+                    "Parameters": [
+                        "GitHubToken",
+                        "GitHubUser",
+                        "GitHubRepo",
+                        "GitHubBranch"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Build Configuration"
+                    },
+                    "Parameters": [
+                        "BuildType",
+                        "BuildComputeType",
+                        "BuildTimeoutInMinutes",
+                        "BuildImage"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "DistBucketName": {
+                    "default": "Name of S3 Bucket that should contain our dist files (If was created earlier, versioning should be enabled, it should be connected to Cloudfront (for better performance) and it should have SSL cert. If it was not exist this template will create all of that for you ISA"
+                },
+                "RepoDistPath": {
+                    "default": "Path of the repo directory that contains the dist files. DON'T end it with a slash."
+                },
+                "BucketDistPath": {
+                    "default": "Path of the bucket directory that will contain the dist files. For example: If you filled this field with `js-assets`, the dist file called `REPO_URL/dist/main.js` will be copied to `CDN_URL/js-assets/main.js`. Leave it empty to copy the files into the root of the bucket or write a path that MUST end with a slash `/`"
+                },
+                "shouldCreateS3Bucket": {
+                    "default": "Write 'true' without the qoutes if you want to create the S3 bucket if you haven't created yet"
+                },
+                "CurrentCloudFrontDistributionId": {
+                  "default": "If you decide not to create an S3 bucket, write the CloudFront distribution ID like: E2BCABB0184BD1 that is currently linked with your bucket. Else, leave it empty"
+                },
+                "DomainName": {
+                    "default": "The Domain name that will be used to access the cdn (It can be assets domain or a domain to a single page app)"
+                },
+                "HostedZoneId": {
+                    "default": "The ID of the hosted zone (Go Rout53 to get it)"
+                },
+                "GitHubToken": {
+                    "default": "GitHub OAuth2 Token"
+                },
+                "GitHubUser": {
+                    "default": "GitHub User/Org Name"
+                },
+                "GitHubRepo": {
+                    "default": "GitHub Repository Name"
+                },
+                "GitHubBranch": {
+                    "default": "GitHub Branch Name"
+                },
+                "BuildType": {
+                    "default": "CodeBuild type"
+                },
+                "BuildComputeType": {
+                    "default": "CodeBuild instance type"
+                },
+                "BuildTimeoutInMinutes": {
+                    "default": "CodeBuild timeout minutes"
+                },
+                "BuildImage": {
+                    "default": "CodeBuild image"
+                }
+            }
+        }
+    },
+    "Conditions": {
+        "ShouldCreateS3Resource": {
+            "Fn::Equals": [
+                {
+                    "Ref": "shouldCreateS3Bucket"
+                },
+                "true"
+            ]
+        },
+        "ShouldSkipS3Resource": {
+          "Fn::Equals": [
+              {
+                  "Ref": "shouldCreateS3Bucket"
+              },
+              "false"
+          ]
+      }
+    },
+    "Resources": {
+        "CodeBuildRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codebuild.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "codebuild-service",
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Effect": "Allow",
+                                    "Action": "*",
+                                    "Resource": "*"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        }
+                    }
+                ]
+            }
+        },
+        "CodePipelineRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "codepipeline.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+                "Path": "/",
+                "Policies": [
+                    {
+                        "PolicyName": "codepipeline-service",
+                        "PolicyDocument": {
+                            "Statement": [
+                                {
+                                    "Action": [
+                                        "codebuild:*"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:GetObject",
+                                        "s3:GetObjectVersion",
+                                        "s3:GetBucketVersioning"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:PutObject"
+                                    ],
+                                    "Resource": [
+                                        "arn:aws:s3:::codepipeline*"
+                                    ],
+                                    "Effect": "Allow"
+                                },
+                                {
+                                    "Action": [
+                                        "s3:*",
+                                        "cloudformation:*",
+                                        "iam:PassRole"
+                                    ],
+                                    "Resource": "*",
+                                    "Effect": "Allow"
+                                }
+                            ],
+                            "Version": "2012-10-17"
+                        }
+                    }
+                ]
+            }
+        },
+        "DistBucket": {
+            "Type": "AWS::S3::Bucket",
+            "Condition": "ShouldCreateS3Resource",
+            "DeletionPolicy": "Delete",
+            "Properties": {
+                "AccessControl": "PublicRead",
+                "BucketName": {
+                    "Ref": "DistBucketName"
+                }
+            }
+        },
+        "PipelineBucket": {
+            "Type": "AWS::S3::Bucket",
+            "DeletionPolicy": "Delete"
+        },
+        "CodeBuildDeployDist": {
+            "Type": "AWS::CodeBuild::Project",
+            "DependsOn": "CodeBuildRole",
+            "Properties": {
+                "Name": {
+                    "Fn::Sub": "${AWS::StackName}-DeployDist"
+                },
+                "Description": "Deploy site to S3",
+                "ServiceRole": {
+                    "Fn::GetAtt": [
+                        "CodeBuildRole",
+                        "Arn"
+                    ]
+                },
+                "Artifacts": {
+                    "Type": "CODEPIPELINE"
+                },
+                "Environment": {
+                    "Type": {
+                        "Ref": "BuildType"
+                    },
+                    "ComputeType": {
+                        "Ref": "BuildComputeType"
+                    },
+                    "Image": {
+                        "Fn::Sub": "${BuildImage}"
+                    },
+                    "EnvironmentVariables": [{
+                        "Name": "DistBucketName",
+                        "Type": "PLAINTEXT",
+                        "Value": {"Ref": "DistBucketName"}
+                    },{
+                        "Name": "BucketDistPath",
+                        "Type": "PLAINTEXT",
+                        "Value": {"Ref": "BucketDistPath"}
+                    },{
+                      "Name": "RepoDistPath",
+                      "Type": "PLAINTEXT",
+                      "Value": {"Ref": "RepoDistPath"}
+                    },{
+                      "Name": "StackName",
+                      "Type": "PLAINTEXT",
+                      "Value": {"Ref": "AWS::StackName"}
+                    }]
+                },
+                "Source": {
+                    "Type": "CODEPIPELINE",
+                    "BuildSpec": "buildspec.yml"
+                },
+                "TimeoutInMinutes": {
+                    "Ref": "BuildTimeoutInMinutes"
+                },
+                "Cache": {
+                    "Type": "LOCAL",
+                    "Modes": [
+                        "LOCAL_SOURCE_CACHE"
+                    ],
+                    "Location": "LOCAL"
+                }
+            }
+        },
+        "Pipeline": {
+            "Type": "AWS::CodePipeline::Pipeline",
+            "Properties": {
+                "RoleArn": {
+                    "Fn::GetAtt": [
+                        "CodePipelineRole",
+                        "Arn"
+                    ]
+                },
+                "Stages": [
+                    {
+                        "Name": "Source",
+                        "Actions": [
+                            {
+                                "InputArtifacts": [],
+                                "Name": "Source",
+                                "ActionTypeId": {
+                                    "Category": "Source",
+                                    "Owner": "ThirdParty",
+                                    "Version": "1",
+                                    "Provider": "GitHub"
+                                },
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "SourceArtifacts"
+                                    }
+                                ],
+                                "Configuration": {
+                                    "Owner": {
+                                        "Ref": "GitHubUser"
+                                    },
+                                    "Repo": {
+                                        "Ref": "GitHubRepo"
+                                    },
+                                    "Branch": {
+                                        "Ref": "GitHubBranch"
+                                    },
+                                    "OAuthToken": {
+                                        "Ref": "GitHubToken"
+                                    }
+                                },
+                                "RunOrder": 1
+                            }
+                        ]
+                    },
+                    {
+                        "Name": "Deploy",
+                        "Actions": [
+                            {
+                                "Name": "Artifact",
+                                "ActionTypeId": {
+                                    "Category": "Build",
+                                    "Owner": "AWS",
+                                    "Version": "1",
+                                    "Provider": "CodeBuild"
+                                },
+                                "InputArtifacts": [
+                                    {
+                                        "Name": "SourceArtifacts"
+                                    }
+                                ],
+                                "OutputArtifacts": [
+                                    {
+                                        "Name": "DeploymentArtifacts"
+                                    }
+                                ],
+                                "Configuration": {
+                                    "ProjectName": {
+                                        "Ref": "CodeBuildDeployDist"
+                                    }
+                                },
+                                "RunOrder": 1
+                            }
+                        ]
+                    }
+                ],
+                "ArtifactStore": {
+                    "Type": "S3",
+                    "Location": {
+                        "Ref": "PipelineBucket"
+                    }
+                }
+            }
+        },
+        "SSLCertificate": {
+            "Type": "Custom::Certificate",
+            "Condition": "ShouldCreateS3Resource",
+            "Properties": {
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "ValidationMethod": "DNS",
+                "ServiceToken": {
+                    "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-certificate-provider"
+                }
+            }
+        },
+        "IssuedCertificate": {
+            "Type": "Custom::IssuedCertificate",
+            "Condition": "ShouldCreateS3Resource",
+            "Properties": {
+                "CertificateArn": {
+                    "Ref": "SSLCertificate"
+                },
+                "ServiceToken": {
+                    "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-certificate-provider"
+                }
+            }
+        },
+        "CertificateDNSRecord": {
+            "Type": "Custom::CertificateDNSRecord",
+            "Condition": "ShouldCreateS3Resource",
+            "Properties": {
+                "CertificateArn": {
+                    "Ref": "SSLCertificate"
+                },
+                "DomainName": {
+                    "Ref": "DomainName"
+                },
+                "ServiceToken": {
+                    "Fn::Sub": "arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:binxio-cfn-certificate-provider"
+                }
+            }
+        },
+        "DomainValidationRecord": {
+            "Type": "AWS::Route53::RecordSetGroup",
+            "Condition": "ShouldCreateS3Resource",
+            "Properties": {
+                "HostedZoneId": {
+                    "Ref": "HostedZoneId"
+                },
+                "RecordSets": [
+                    {
+                        "Name": {
+                            "Fn::GetAtt": [
+                                "CertificateDNSRecord",
+                                "Name"
+                            ]
+                        },
+                        "Type": {
+                            "Fn::GetAtt": [
+                                "CertificateDNSRecord",
+                                "Type"
+                            ]
+                        },
+                        "TTL": 60,
+                        "Weight": 1,
+                        "SetIdentifier": {
+                            "Ref": "SSLCertificate"
+                        },
+                        "ResourceRecords": [
+                            {
+                                "Fn::GetAtt": [
+                                    "CertificateDNSRecord",
+                                    "Value"
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "DistCloudFront": {
+            "Type": "AWS::CloudFront::Distribution",
+            "Condition": "ShouldCreateS3Resource",
+            "Properties": {
+                "DistributionConfig": {
+                    "Aliases": [
+                        {
+                            "Ref": "DomainName"
+                        }
+                    ],
+                    "Enabled": true,
+                    "HttpVersion": "http2",
+                    "Origins": [
+                        {
+                            "DomainName": {
+                                "Fn::Select": [
+                                    1,
+                                    {
+                                        "Fn::Split": [
+                                            "//",
+                                            {
+                                                "Fn::GetAtt": [
+                                                    "DistBucket",
+                                                    "WebsiteURL"
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            "Id": "origin",
+                            "CustomOriginConfig": {
+                                "OriginProtocolPolicy": "http-only"
+                            }
+                        }
+                    ],
+                    "DefaultCacheBehavior": {
+                        "TargetOriginId": "origin",
+                        "ForwardedValues": {
+                            "QueryString": false
+                        },
+                        "ViewerProtocolPolicy": "redirect-to-https",
+                        "Compress": true
+                    },
+                    "PriceClass": "PriceClass_100",
+                    "ViewerCertificate": {
+                        "AcmCertificateArn": {
+                            "Ref": "IssuedCertificate"
+                        },
+                        "SslSupportMethod": "sni-only"
+                    }
+                }
+            }
+        }
+    },
+    "Outputs": {
+        "PipelineUrl": {
+            "Value": {
+                "Fn::Sub": "https://console.aws.amazon.com/codepipeline/home?region=${AWS::Region}#/view/${Pipeline}"
+            },
+            "Description": "CodePipeline URL"
+        },
+        "BucketUrl": {
+            "Condition": "ShouldCreateS3Resource",
+            "Value": {
+                "Fn::GetAtt": [
+                    "DistBucket",
+                    "WebsiteURL"
+                ]
+            },
+            "Description": "S3 bucket URL"
+        },
+        "DNSRecord": {
+            "Condition": "ShouldCreateS3Resource",
+            "Value": {
+                "Fn::Sub": "${CertificateDNSRecord.Name} ${CertificateDNSRecord.Type} ${CertificateDNSRecord.Value}"
+            }
+        },
+        "DistCloudFrontDomain": {
+            "Condition": "ShouldCreateS3Resource",
+            "Description": "The CloudFront domain name for the dist/bucket domain that we can use to add a CNAME later.",
+            "Value": {
+                "Fn::GetAtt": [
+                    "DistCloudFront",
+                    "DomainName"
+                ]
+            }
+        },
+        "DistCloudFrontDistributionID": {
+            "Condition": "ShouldCreateS3Resource",
+            "Description": "The CloudFront domain name for the dist/bucket domain that we can use to add a CNAME later.",
+            "Value": {
+                "Ref": "DistCloudFront"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "DistCloudFrontDistributionID",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                }
+            }
+        },
+        "CurrentCloudFrontDomain": {
+            "Condition": "ShouldSkipS3Resource",
+            "Description": "The CloudFront domain name.",
+            "Value": {
+              "Ref": "CurrentCloudFrontDistributionId"
+            },
+            "Export": {
+                "Name": {
+                    "Fn::Join": [
+                        "-",
+                        [
+                            "DistCloudFrontDistributionID",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}

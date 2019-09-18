@@ -1,0 +1,37 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      nodejs: 8
+
+    commands:
+      # Install dependencies.
+      - npm install bower -g
+      - npm install
+      - bower install --allow-root
+      
+      # Upgrade AWS CLI to the latest version.
+      - pip3 install awscli --upgrade
+
+  pre_build:
+    commands:
+      # Discover and run unit tests in the 'tests' directory
+      # - npm test
+
+  build:
+    commands:
+      # Build Code
+      - npm run build
+
+  post_build:
+    commands:
+      - aws s3 rm s3://${DistBucketName}/${BucketDistPath} --recursive 
+      - aws s3 cp --recursive --exclude '*.js.map' --acl public-read ./${RepoDistPath} s3://${DistBucketName}/${BucketDistPath} 
+      - DISTRIBUTION_ID=$(aws cloudformation list-exports --query "Exports[?Name=='DistCloudFrontDistributionID-${StackName}'].Value" --no-paginate --output text)
+      - aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*' 
+
+artifacts:
+  type: zip
+  files:
+    - './dist/*'

@@ -1,0 +1,7 @@
+node_modules
+.tmp
+bower_components
+test/bower_components
+addon/contentScriptTracking.js
+web/.tmp.index.html
+/.idea
