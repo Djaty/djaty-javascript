@@ -29,7 +29,7 @@ phases:
       - aws s3 rm s3://${DistBucketName}/${BucketDistPath} --recursive 
       - aws s3 cp --recursive --exclude '*.js.map' --acl public-read ./${RepoDistPath} s3://${DistBucketName}/${BucketDistPath} 
       - DISTRIBUTION_ID=$(aws cloudformation list-exports --query "Exports[?Name=='DistCloudFrontDistributionID-${StackName}'].Value" --no-paginate --output text)
-      - aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths '/*' 
+      - aws cloudfront create-invalidation --distribution-id $DISTRIBUTION_ID --paths "/${BucketDistPath}*" 
 
 artifacts:
   type: zip
