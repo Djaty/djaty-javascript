@@ -611,31 +611,35 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
         return -1;
       }
 
-      if (typeof value === 'boolean') {
-        result.size += 4;
-      } else if (typeof value === 'string') {
-        result.size += value.length * 2;
-      } else if (typeof value === 'number') {
-        result.size += 8;
-      } else if (typeof value === 'object' && objectList.indexOf(value) === -1) {
-        objectList.push(value);
-        // eslint-disable-next-line guard-for-in, no-restricted-syntax
-        for (const i in value) {
-          if (exceedLimit) {
-            return result;
-          }
+      try {
+        if (typeof value === 'boolean') {
+          result.size += 4;
+        } else if (typeof value === 'string') {
+          result.size += value.length * 2;
+        } else if (typeof value === 'number') {
+          result.size += 8;
+        } else if (typeof value === 'object' && objectList.indexOf(value) === -1) {
+          objectList.push(value);
+          // eslint-disable-next-line guard-for-in, no-restricted-syntax
+          for (const i in value) {
+            if (exceedLimit) {
+              return result;
+            }
 
-          if (objectList.length === 1) {
-            result.uniqueStr += `${i}_${typeof i}_${i.length};`;
+            if (objectList.length === 1) {
+              result.uniqueStr += `${i}_${typeof i}_${i.length};`;
+            }
+            result.size += 8; // an assumed existence overhead
+            if (recurse(value[i]) === -1) {
+              exceedLimit = true;
+              result.size = -1;
+              return result;
+            }
+            // setTimeout(() => recurse(value[i]) === -1 && cb(-1));
           }
-          result.size += 8; // an assumed existence overhead
-          if (recurse(value[i]) === -1) {
-            exceedLimit = true;
-            result.size = -1;
-            return result;
-          }
-          // setTimeout(() => recurse(value[i]) === -1 && cb(-1));
         }
+      } catch (err) {
+        Djaty.logger.info('@Djaty: Catch errors from unreadable properties from objects', err);
       }
 
       return result;
