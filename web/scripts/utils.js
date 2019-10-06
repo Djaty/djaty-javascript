@@ -640,6 +640,7 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
         }
       } catch (err) {
         Djaty.logger.info('@Djaty: Catch errors from unreadable properties from objects', err);
+        result.size = -1;
       }
 
       return result;
