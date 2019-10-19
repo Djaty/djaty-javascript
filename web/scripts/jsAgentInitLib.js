@@ -322,7 +322,7 @@
 
         Djaty.logger.info('Error in loading djaty core', err, msg);
         const errMsg = msg || 'Refused to connect to Djaty. It is most likely a Content Security' +
-          ' Policy (CSP) or a connectivity problem. To solve this issue see <a>FAQ</a>';
+          ` Policy (CSP) or a connectivity problem. To solve this issue see <a href="${Djaty.config.apiUrl}/docs/SDKs/frontendJs/troubleshooting.html#use-djaty-javascript-sdk-with-a-content-security-policy">Troubleshooting</a>`;
 
         Djaty.logger.error('Can\'t load (Djaty core)', errMsg, err);
 
@@ -387,7 +387,7 @@
         Djaty.logger.error('Catch CORS error during loading djaty core tracking file', err);
         if (err.message.indexOf('Content Security Policy') !== -1) {
           onLoadError(`${err.name}: Refused to connect to Djaty server to solve this problem see ` +
-            `<a href="${Djaty.config.apiUrl}/faq">FAQ</a>`);
+            `<a href="${Djaty.config.apiUrl}/docs/SDKs/frontendJs/troubleshooting.html#use-djaty-javascript-sdk-with-a-content-security-policy">Troubleshooting</a>`);
 
           return;
         }
