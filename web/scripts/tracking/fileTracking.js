@@ -5,6 +5,7 @@
 * file will be injected by the extension or manually by including the file.
 */
 
+/* global URL */
 const fileTracker = {
   /* ###################################################################### */
   /* ########################### PUBLIC METHODS ########################### */
@@ -84,7 +85,7 @@ const fileTracker = {
     if (ev === 'error') {
       const sha256 = Djaty.libs.sha256;
       formattedObj.hash = sha256(src + Djaty.trackingApp.agentId + Djaty.constants.itemType.file);
-      formattedObj.shortTitle = `File: ${src.substring(src.lastIndexOf('/') + 1, src.length)}`;
+      formattedObj.shortTitle = `File: ${(new URL(src)).pathname}`;
       formattedObj.longTitle = Djaty.utils.limitString(`File: <${tagName}> ${src}`,
           Djaty.constants.titleLimit);
       return cb({ formattedObj, type: 'error' });
