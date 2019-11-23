@@ -90,7 +90,8 @@ const utils = Djaty.utils = Djaty.utils || {
               throw err;
             }
 
-            Djaty.logger.error('Catch async methods (listeners, .. ) error message ', err);
+            Djaty.logger.error(`Catch async methods (listeners, .. ) error message for method '${methodName}'` +
+              `is the async callback still exists: '${!!item}'`, err);
           }
         };
         if (wrappingOp) {
