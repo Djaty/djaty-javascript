@@ -90,8 +90,12 @@ const utils = Djaty.utils = Djaty.utils || {
               throw err;
             }
 
-            Djaty.logger.error(`Catch async methods (listeners, .. ) error message for method '${methodName}'` +
-              `is the async callback still exists: '${!!item}'`, err);
+            const itemDetails = typeof item === 'function' ? `the item.toString is ${item.toString()}` :
+              `the item is not a function ${item}`;
+
+            Djaty.logger.error('Catch async methods (listeners, .. ) error message for ' +
+             `method '${methodName}' is the async callback with type '${typeof item}' still ` +
+              `exists: '${!!item}' the item details is ${itemDetails}`, err);
           }
         };
         if (wrappingOp) {
