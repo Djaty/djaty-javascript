@@ -37,7 +37,7 @@ const formTracker = {
   * @return void
   */
   timelineFormatter({ ev, time = Date.now() }) {
-    if (!(ev instanceof Event && ev.type === 'submit')) {
+    if (!(Djaty.utils.isInstanceOf('Event', ev) && ev.type === 'submit')) {
       throw new Error('timelineFormatter only accept events of type \'submit\'');
     }
 

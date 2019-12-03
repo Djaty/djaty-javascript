@@ -34,7 +34,7 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
    */
   getEventHandler(instance, handler) {
     // Error Handling
-    if (!(instance instanceof Object)) {
+    if (!(Djaty.utils.isInstanceOf('Object', instance))) {
       throw new Error('Make sure you pass "getEventHandler" instance parameter as an object');
     }
 
@@ -124,11 +124,11 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
       throw new Error('Make sure you pass "assertValidOpts" label parameter correctly');
     }
 
-    if (!(optStruct instanceof Object)) {
+    if (!(Djaty.utils.isInstanceOf('Object', optStruct))) {
       throw new Error('Make sure you pass "assertValidOpts" optStruct parameter correctly');
     }
 
-    if (!(opt instanceof Object)) {
+    if (!(Djaty.utils.isInstanceOf('Object', opt))) {
       throw new Error(`${label} expects opt parameter to be an object`);
     }
 
@@ -221,7 +221,7 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
   normalizedPointerPos(ev, axis) {
     // Error Handling
     const ptr = /mousemove|mouseup|mousedown|touchstart|touchend|touchmove/;
-    if (!(ev instanceof Event && ptr.test(ev.type))) {
+    if (!(Djaty.utils.isInstanceOf('Event', ev) && ptr.test(ev.type))) {
       // Check if ev is an Event object
       throw new Error('"normalizedPointerPos" expects ev parameter to be an Event object');
     }
@@ -339,7 +339,7 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
   },
 
   someObject(object, cb) {
-    if (!(object instanceof Object)) {
+    if (!Djaty.utils.isInstanceOf('Object', object)) {
       throw new Error('Make sure you pass "someObject" obj parameter as an object');
     }
 
@@ -629,6 +629,7 @@ const utils = Djaty.utils = Djaty.utils.assign(Djaty.utils, {
             if (objectList.length === 1) {
               result.uniqueStr += `${i}_${typeof i}_${i.length};`;
             }
+
             result.size += 8; // an assumed existence overhead
             if (recurse(value[i]) === -1) {
               exceedLimit = true;

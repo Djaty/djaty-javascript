@@ -30,7 +30,7 @@ const utils = Djaty.utils = Djaty.utils || {
    */
   forOwn(obj, cb) {
     // Error Handling
-    if (!(obj instanceof Object)) {
+    if (!(Djaty.utils.isInstanceOf('Object', obj))) {
       throw new Error('Make sure you pass "forOwn" obj parameter as an object');
     }
 
@@ -331,7 +331,7 @@ const utils = Djaty.utils = Djaty.utils || {
    */
   nodeListToArr(arrAlike) {
     // Error Handling
-    if (arrAlike.constructor !== NodeList) {
+    if (!Djaty.utils.isInstanceOf('NodeList', arrAlike)) {
       throw new Error('"nodeListToArr" expects arrAlike parameter to be NodeList');
     }
 
@@ -489,5 +489,35 @@ const utils = Djaty.utils = Djaty.utils || {
       Djaty.utils.externalMethodHandler.listeners = {};
       this.nodeListeners = [];
     },
+  },
+  /**
+   * Is instance of target (object/event/array/...) has type of a specific type
+   *
+   * The checking is recursively to compare this type with the current target type
+   * and with his parents types.
+   *
+   * We avoid to check with the class itself or builtin instanceof method
+   * because of they are working for elements in the same window,
+   * not for different windows or not with the current window and embedded iframes.
+   *
+   * @param type
+   * @param target
+   * @returns {*}
+   */
+  isInstanceOf(type, target) {
+    if (target.constructor.name === type) {
+      return true;
+    }
+
+    // I used __proto__ to compare the type with the parent class type
+    // ex: the `KeyboardEvent` class is child for `Event` class
+    // but I need to check the target that has type `Event`.
+    // eslint-disable-next-line no-proto
+    if (!target.__proto__) {
+      return false;
+    }
+
+    // eslint-disable-next-line no-proto
+    return this.isInstanceOf(type, target.__proto__);
   },
 };

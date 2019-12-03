@@ -1333,7 +1333,7 @@
     * @return void
     */
     _onFormSubmit(ev) {
-      if (!(ev instanceof Event && ev.type === 'submit')) {
+      if (!(Djaty.utils.isInstanceOf('Event', ev) && ev.type === 'submit')) {
         throw new Error('_onFormSubmit only accept events of type \'submit\'');
       }
 
