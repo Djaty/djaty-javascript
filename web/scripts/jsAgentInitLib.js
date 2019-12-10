@@ -1179,7 +1179,18 @@
 
       const allDOMElement = document.querySelectorAll(fileTypesNames.join(', '));
       utils.nodeListToArr(allDOMElement).forEach(nodeEl => {
-        addNodeListener(nodeEl);
+        const tagName = nodeEl.nodeName.toLowerCase();
+        const type = fileTypes[tagName];
+
+        // if not an intent node type or has djaty-app
+        // attr(to exclude current script from the process)
+        // and if doesn't have a scr/href
+        if (!(type && nodeEl[type.target] && !nodeEl.hasAttribute('djaty-app') &&
+          !nodeEl.hasAttribute('__djaty_file_already_tracked'))) {
+          return;
+        }
+
+        addNodeListener(nodeEl, type);
       });
 
       // Listening to every DOM element when added.
