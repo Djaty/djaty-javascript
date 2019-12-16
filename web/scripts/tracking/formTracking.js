@@ -46,60 +46,62 @@ const formTracker = {
     const inputTypes = ['input', 'textarea', 'select'];
 
     Djaty.utils.forOwn(ev.target, (key, val) => {
-      if (Djaty.utils.isDomElement(val) && inputTypes
+      if (!(Djaty.utils.isDomElement(val) && inputTypes
           .some(type => val.nodeName.toLowerCase() === type) && val.type !== 'submit'
-          && !((val.type === 'radio' || val.type === 'checkbox') && !val.checked)) {
-        // Check if form has at least one password field
-        isPwdForm = val.type === 'password' && !isPwdForm ? !isPwdForm : isPwdForm;
-        let values = null;
-        if (val.type === 'select-multiple' || val.type === 'select-one') {
-          values = [];
-          Djaty.utils.forOwn(val.selectedOptions, (index, option) => {
-            values.push({
-              text: option.text,
-              value: option.value,
-            });
-          });
-        }
-
-        const existingField = inputs.find(input => input.name === val.name);
-
-        if (val.type === 'checkbox') {
-          if (existingField && val.checked) {
-            if (!Array.isArray(existingField.value)) {
-              existingField.value = [existingField.value];
-            }
-
-            existingField.value.push(val.value);
-            return;
-          }
-
-          if (!val.checked) {
-            return;
-          }
-        }
-
-        if (val.type === 'radio') {
-          if (existingField) {
-            existingField.value = val.checked ? val.value : existingField.value;
-            return;
-          }
-          val.value = val.checked ? val.value : '';
-        }
-
-        const inputInfo = {
-          type: val.type,
-          name: val.name,
-        };
-
-        if (values) {
-          inputInfo.values = values;
-        } else {
-          inputInfo.value = val.value;
-        }
-
-        inputs.push(inputInfo);
+          && !((val.type === 'radio' || val.type === 'checkbox') && !val.checked))) {
+        return;
       }
+
+      // Check if form has at least one password field
+      isPwdForm = val.type === 'password' && !isPwdForm ? !isPwdForm : isPwdForm;
+      let values = null;
+      if (val.type === 'select-multiple' || val.type === 'select-one') {
+        values = [];
+        Djaty.utils.forOwn(val.selectedOptions, (index, option) => {
+          values.push({
+            text: option.text,
+            value: option.value,
+          });
+        });
+      }
+
+      const existingField = inputs.find(input => input.name === val.name);
+
+      if (val.type === 'checkbox') {
+        if (existingField && val.checked) {
+          if (!Array.isArray(existingField.value)) {
+            existingField.value = [existingField.value];
+          }
+
+          existingField.value.push(val.value);
+          return;
+        }
+
+        if (!val.checked) {
+          return;
+        }
+      }
+
+      if (val.type === 'radio') {
+        if (existingField) {
+          existingField.value = val.checked ? val.value : existingField.value;
+          return;
+        }
+        val.value = val.checked ? val.value : '';
+      }
+
+      const inputInfo = {
+        type: val.type,
+        name: val.name || val.placeholder.toLowerCase() || val.type,
+      };
+
+      if (values) {
+        inputInfo.values = values;
+      } else {
+        inputInfo.value = val.value;
+      }
+
+      inputs.push(inputInfo);
     });
 
     if (!inputs.length) {
