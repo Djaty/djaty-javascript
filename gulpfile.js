@@ -5,8 +5,6 @@ const gulp = require('gulp');
 const gulpLoadPlugins = require('gulp-load-plugins');
 const browserSync = require('browser-sync');
 const del = require('del');
-const concat = require('gulp-concat');
-const closure = require('gulp-jsclosure');
 const wrap = require('gulp-wrap-umd');
 // const debug = require('gulp-debug');
 

@@ -1,12 +1,12 @@
 {
   "name": "@djaty/djaty-javascript",
-  "version": "1.0.7-beta",
+  "version": "0.0.0-development",
   "description": "Official Djaty SDK for Javascript",
   "author": "Djaty",
   "license": "BSD-3-Clause",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Djaty/djaty-javascript.git"
+    "url": "https://github.com/Djaty/djaty-javascript.git"
   },
   "homepage": "https://djaty.com/docs/SDKs/frontendJs/index.html",
   "engines": {
@@ -14,12 +14,22 @@
   },
   "scripts": {
     "build": "gulp",
-    "serve": "gulp serve"
+    "serve": "gulp serve",
+    "commit": "git-cz",
+    "semantic-release": "dotenv -e .tokens -- semantic-release --no-ci",
+    "semantic-release:preview-only": "dotenv -e .tokens -- semantic-release --dry-run"
   },
   "dependencies": {
     "vinyl-source-stream": "^1.1.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^8.2.0",
+    "@commitlint/config-conventional": "^8.2.0",
+    "@semantic-release/changelog": "^3.0.6",
+    "@semantic-release/commit-analyzer": "^6.3.3",
+    "@semantic-release/git": "^7.0.18",
+    "@semantic-release/npm": "^5.3.4",
+    "@semantic-release/release-notes-generator": "^7.3.5",
     "babel-core": "^6.4.0",
     "babel-plugin-syntax-exponentiation-operator": "^6.13.0",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
@@ -28,7 +38,10 @@
     "babel-register": "^6.5.2",
     "bower": "^1.8.0",
     "browser-sync": "^2.2.1",
+    "commitizen": "^4.0.3",
+    "cz-conventional-changelog": "^3.0.2",
     "del": "^1.1.1",
+    "dotenv-cli": "^3.1.0",
     "eslint": "^3.16.1",
     "eslint-config-airbnb": "^14.1.0",
     "eslint-plugin-import": "^2.2.0",
@@ -54,9 +67,12 @@
     "gulp-uglify": "^1.1.0",
     "gulp-useref": "^3.0.0",
     "gulp-wrap-umd": "^0.2.1",
+    "husky": "^3.1.0",
     "jpm": "^1.1.4",
+    "lint-staged": "^9.5.0",
     "main-bower-files": "^2.5.0",
     "sass-lint": "^1.10.2",
+    "semantic-release": "^15.13.31",
     "wiredep": "^2.2.2",
     "xo": "^0.12.0"
   },
@@ -71,6 +87,11 @@
         2,
         "single"
       ]
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
     }
   }
 }

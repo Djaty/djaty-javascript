@@ -3,11 +3,11 @@ Djaty.libs = {};
 const libs = [
   {
     name: 'UAParser',
-    path: '../../bower_components/ua-parser-js/dist/ua-parser.min.js',
+    path: '../../bower_components/ua-parser-js/src/ua-parser.js',
   },
   {
     name: 'sha256',
-    path: '../../bower_components/js-sha256/build/sha256.min.js',
+    path: '../../bower_components/js-sha256/src/sha256.js',
   },
 ];
 
