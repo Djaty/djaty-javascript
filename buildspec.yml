@@ -26,6 +26,7 @@ phases:
 
   post_build:
     commands:
+      - bash -c "if [ /"$CODEBUILD_BUILD_SUCCEEDING/" == /"0/" ]; then exit 1; fi"
       - aws s3 rm s3://${DistBucketName}/${BucketDistPath} --recursive
       - aws s3 cp --recursive --exclude '*.js.map' --acl public-read ./${RepoDistPath} s3://${DistBucketName}/${BucketDistPath}
       - DISTRIBUTION_ID=$(aws cloudformation list-exports --query "Exports[?Name=='DistCloudFrontDistributionID-${StackName}'].Value" --no-paginate --output text)
