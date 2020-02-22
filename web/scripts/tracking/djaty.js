@@ -153,6 +153,16 @@
 
         const item = Djaty.initApp.timeline[length];
 
+        // To avoid using unloaded trackers in old versions.
+        if (!Djaty.trackingApp.trackers[item.itemType]) {
+          const itemIndex = Djaty.initApp.timeline.indexOf(item);
+
+          Djaty.initApp.timeline.splice(itemIndex, 1);
+          Djaty.trackingApp._formatInitAppTimelineItems(itemIndex);
+
+          return;
+        }
+
         // We have two type of items:
         // - Normal items: We get all details of the timeline item only once.
         // - Pending items: They have 2 states (pending, finished):
@@ -642,6 +652,11 @@
         }
 
         const app = Djaty.trackingApp;
+
+        // To avoid using unloaded trackers in old versions.
+        if (!app.trackers[item.itemType]) {
+          return;
+        }
 
         // We have two type of items:
         // - Normal items: We get all details of the timeline item only once.

@@ -56,6 +56,7 @@ Djaty.constants = Djaty.constants || {
     exception: 'exception',
     file: 'file',
     console: 'console',
+    click: 'click',
   },
   defaultMode: {
     removeSecretData: SECRET_ITEM_FIELDS,
@@ -86,6 +87,7 @@ Djaty.constants = Djaty.constants || {
 
     file: true,
 
+    click: true,
     exception: {
       repetitionCount: false,
     },
@@ -104,6 +106,7 @@ Djaty.constants = Djaty.constants || {
       response: true,
       requestPayload: true,
     },
+    click: true,
 
     console: {
       repetitionCount: true,
@@ -244,6 +247,10 @@ Djaty.constants = Djaty.constants || {
             required: false,
           },
           removeEmail: {
+            types: ['boolean'],
+            required: false,
+          },
+          click: {
             types: ['boolean'],
             required: false,
           },

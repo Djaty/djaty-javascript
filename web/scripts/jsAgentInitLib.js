@@ -534,6 +534,49 @@
     Djaty.initApp.globalCustomData.push(data);
   };
 
+  const clickTracker = {
+    onTrackingCb: null,
+    isInitiated: false,
+
+    init(onTrackingCb) {
+      if (this.isInitiated) {
+        return;
+      }
+
+      this.isInitiated = true;
+      this.onTrackingCb = onTrackingCb;
+
+      Djaty.initApp._attachInitNodeListenersToOurEvents([{
+        node: document,
+        eventName: 'click',
+        cb: ev => {
+          clickTracker.handleClickEvent(ev);
+        },
+      }]);
+    },
+
+    handleClickEvent(ev) {
+      const time = Date.now();
+      const item = {
+        itemType: Djaty.constants.itemType.click,
+        ev,
+        time,
+      };
+
+      clickTracker.onTrackingCb(item);
+    },
+
+    destroy() {
+      if (!this.isInitiated) {
+        return;
+      }
+
+      this.isInitiated = false;
+    },
+  };
+
+  Djaty.initApp.addTracker(Djaty.constants.itemType.click, clickTracker);
+
   /* ########################################################################## */
   /* ############################### NAVIGATION ############################### */
   /* ########################################################################## */
