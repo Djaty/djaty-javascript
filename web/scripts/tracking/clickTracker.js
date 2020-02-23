@@ -5,7 +5,6 @@
 * file will be injected by the extension or manually by including the file.
 */
 
-/* global URL */
 const clickTracker = {
   /* ###################################################################### */
   /* ########################### PUBLIC METHODS ########################### */
@@ -23,8 +22,7 @@ const clickTracker = {
   /**
    * Save Data into timeline.
    *
-   * @param  {Array} node
-   * @param  {String} ev
+   * @param  {Event} ev
    * @param  {Number} time
    * @param  {Function} cb
    * @return {void}
@@ -43,7 +41,7 @@ const clickTracker = {
   /**
   * Format timeline object.
   *
-  * @param  {String} ev
+  * @param  {Event} ev
   * @param  {Number} time
   * @param  {Function} cb
   * @return {Function}
@@ -53,9 +51,15 @@ const clickTracker = {
       throw new Error('Make sure you pass "_formatTimelineObj" parameters correctly');
     }
 
+    let elementPath = this.getElementPath(ev.target).slice(3);
+    if (elementPath.length >= Djaty.constants.elementPathMaxLength) {
+      elementPath = elementPath
+        .slice(Djaty.constants.elementPathMaxLength - elementPath.length - 1);
+    }
+
     const formattedObj = {
       tagName: ev.target.nodeName.toLowerCase(),
-      path: this.getElementPath(ev.target).slice(3),
+      path: elementPath,
       timestamp: time,
     };
 

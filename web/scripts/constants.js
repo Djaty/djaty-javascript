@@ -374,4 +374,5 @@ Djaty.constants = Djaty.constants || {
     DEV: 'Dev',
     TEST: 'Test',
   },
+  elementPathMaxLength: 512,
 };
