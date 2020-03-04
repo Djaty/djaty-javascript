@@ -72,9 +72,16 @@ const clickTracker = {
     }
 
     const elName = el.nodeName.toLocaleLowerCase();
-    const elClassList = el.classList.length ? `.${el.className.split(' ').join('.')}` : '';
+    let elClassList = el.classList.length && (el.className || '').trim() ?
+      `.${el.className.split(' ').join('.')}` : '';
 
-    return `${this.getElementPath(el.parentElement, ++elNumber)} >  ${elName}${elClassList}`;
+    if (elNumber === 1) {
+      elClassList += el.type ? `[type=${el.type}]` : '';
+      elClassList += el.name ? `[name=${el.name}]` : '';
+      elClassList += el.innerText ? `[text=${el.innerText.trim().slice(0, 20)}]` : '';
+    }
+
+    return `${this.getElementPath(el.parentElement, ++elNumber)} > ${elName}${elClassList}`;
   },
 };
 
