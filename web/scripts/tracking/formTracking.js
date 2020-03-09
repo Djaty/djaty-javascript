@@ -34,9 +34,10 @@ const formTracker = {
   *
   * @param {Event} ev
   * @param {Number} time
+  * @param {Function} cb
   * @return void
   */
-  timelineFormatter({ ev, time = Date.now() }) {
+  timelineFormatter({ ev, time = Date.now() }, cb) {
     if (!(Djaty.utils.isInstanceOf('Event', ev) && ev.type === 'submit')) {
       throw new Error('timelineFormatter only accept events of type \'submit\'');
     }
@@ -92,7 +93,7 @@ const formTracker = {
 
       const inputInfo = {
         type: val.type,
-        name: val.name || val.placeholder.toLowerCase() || val.type,
+        name: val.name || val.placeholder && val.placeholder.toLowerCase() || val.type,
       };
 
       if (values) {
@@ -114,6 +115,15 @@ const formTracker = {
       url: window.location.href,
       timestamp: time,
     });
+
+    const formattedObj = {
+      formInputs: inputs.length,
+      formText: `${isPwdForm ? 'Password' : ' Normal'} form is submitted.`,
+      url: window.location.href,
+      timestamp: time,
+    };
+
+    cb({ formattedObj });
   },
 };
 
