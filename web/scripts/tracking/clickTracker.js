@@ -72,8 +72,11 @@ const clickTracker = {
     }
 
     const elName = el.nodeName.toLocaleLowerCase();
-    let elClassList = el.classList.length && (el.className || '').trim() ?
-      `.${el.className.split(' ').join('.')}` : '';
+
+    // Use `el.getAttribute('class') instead of `el.className` because it may have
+    // `SVGAnimatedString` for SVG elements
+    let elClassList = (el.getAttribute('class') || '').trim() ?
+      `.${el.getAttribute('class').split(' ').join('.')}` : '';
 
     if (elNumber === 1) {
       elClassList += el.type ? `[type=${el.type}]` : '';
