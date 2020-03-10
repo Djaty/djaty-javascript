@@ -300,10 +300,6 @@
         return Djaty.initApp.onTrackingCoreCb(item);
       }
 
-      if (item.itemType === Djaty.constants.itemType.form) {
-        return Djaty.initApp.initialFormData.push(item);
-      }
-
       return Djaty.initApp.timeline.push(item);
     },
     /* ########################################################################## */

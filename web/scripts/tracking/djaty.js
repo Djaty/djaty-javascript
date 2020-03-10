@@ -84,7 +84,6 @@
           tracker.init(localStorageWrapper);
         });
 
-
         // Destroy disabled trackers.
         Djaty.utils.forOwn(Djaty.constants.itemType, (itemKey, itemValue) => {
           if (!Djaty.config.trackingOptions[itemValue]) {
@@ -92,7 +91,10 @@
           }
         });
 
+        Djaty.trackingApp._trackTimelineBetweenPages();
+
         // Format initialFormData
+        // @Deprecated for old initial djaty-javascript sdk.
         Djaty.initApp.initialFormData.forEach(formItem => {
           Djaty.trackingApp.trackers.form.timelineFormatter(formItem);
         });
@@ -100,6 +102,7 @@
         Djaty.initApp.initialFormData = [];
 
         Djaty.trackingApp._formatInitAppTimelineItems(0);
+        Djaty.trackingApp._restoreCachedTimelineItems();
       } catch (err) {
         Djaty.logger.error('Catch Init trackingApp with error', err);
       }
@@ -876,6 +879,63 @@
      */
     _getUser() {
       return Djaty.config.user ? Djaty.utils.assign({}, Djaty.config.user) : undefined;
+    },
+
+    /**
+     * Track timeline items between pages
+     *
+     * Store timeline items in localStorage before navigating to next page.
+     *
+     * @private
+     */
+    _trackTimelineBetweenPages() {
+      Djaty.utils.addEventListenerAndSaveIt([{
+        eventName: 'unload',
+        nodeListeners: Djaty.initApp.nodeListeners,
+        cb: () => {
+          Djaty.trackingApp._cacheTimelineOnUnload();
+        },
+        node: window,
+      }]);
+    },
+    /**
+     * Restore cached timeline items from previous page
+     *
+     * @private
+     */
+    _restoreCachedTimelineItems() {
+      const cached = Djaty.trackingApp.localStorage.getData('cached');
+
+      if (!cached.cachedTimeline || !cached.cachedTimeline.length) {
+        Djaty.trackingApp.localStorage.remove('cached');
+
+        return;
+      }
+
+      // Remove cached timeline items if the stored cached timeline items more than 5 mins
+      // That's mean that this is new landing on this project not navigation between pages
+      // or form submission.
+      if (Date.now() - cached.timestamp >= 5 * 60 * 1000) {
+        Djaty.trackingApp.localStorage.remove('cached');
+
+        return;
+      }
+
+      Djaty.initApp.timeline.unshift(...cached.cachedTimeline);
+
+      if (Djaty.initApp.timeline.length >= Djaty.config.timelineLimit) {
+        Djaty.initApp.timeline
+          .splice(0, Djaty.initApp.timeline.length - Djaty.config.timelineLimit);
+        Djaty.initApp.timeline.unshift({ itemType: 'trimming' });
+      }
+
+      Djaty.trackingApp.localStorage.remove('cached');
+    },
+    _cacheTimelineOnUnload() {
+      Djaty.trackingApp.localStorage.set('cached', {
+        cachedTimeline: Djaty.initApp.timeline,
+        timestamp: Date.now(),
+      });
     },
   };
 })();
