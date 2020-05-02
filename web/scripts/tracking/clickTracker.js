@@ -51,7 +51,19 @@ const clickTracker = {
       throw new Error('Make sure you pass "_formatTimelineObj" parameters correctly');
     }
 
+    // Ignore our clicks on our extension elements.
+    const djatyEl = document.querySelector('.djaty');
+    if (djatyEl && djatyEl.contains(ev.target)) {
+      return cb({ isIgnored: true });
+    }
+
     let elementPath = this.getElementPath(ev.target).slice(3);
+
+    // Ignore clicks without parent elements.
+    if (!elementPath || elementPath === ev.target.nodeName.toLowerCase()) {
+      return cb({ isIgnored: true });
+    }
+
     if (elementPath.length >= Djaty.constants.elementPathMaxLength) {
       elementPath = elementPath
         .slice(Djaty.constants.elementPathMaxLength - elementPath.length - 1);
