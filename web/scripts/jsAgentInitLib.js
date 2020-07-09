@@ -748,8 +748,12 @@
         // };
         // const reqMap = ajaxTracker.reqMap;
         // reqMap.push({xhr: this, reqId});
-        args[1] += args[1].match(/\?/) ? '&' : '?';
-        args[1] += `djatyReqId=${requestId}`;
+
+        if (Djaty.config.trackingOptions.hasBackendIntegration) {
+          args[1] += args[1].match(/\?/) ? '&' : '?';
+          args[1] += `djatyReqId=${requestId}`;
+        }
+
         this.__djaty = {
           openParams: args,
           reqStart: requestStart,
