@@ -64,6 +64,7 @@ Djaty.constants = Djaty.constants || {
     localStorage: false,
     sessionStorage: false,
     cookies: false,
+    hasBackendIntegration: false,
     ajax: {
       queryParams: false,
       cookies: false,
@@ -98,6 +99,7 @@ Djaty.constants = Djaty.constants || {
     localStorage: true,
     sessionStorage: true,
     cookies: true,
+    hasBackendIntegration: false,
     ajax: {
       queryParams: true,
       cookies: true,
@@ -263,6 +265,10 @@ Djaty.constants = Djaty.constants || {
             required: false,
           },
           cookies: {
+            types: ['boolean'],
+            required: false,
+          },
+          hasBackendIntegration: {
             types: ['boolean'],
             required: false,
           },

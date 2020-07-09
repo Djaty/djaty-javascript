@@ -224,8 +224,9 @@ const ajaxTracker = {
       responseText: allowedResp.length < Djaty.constants.requestSizeLimit ?
         allowedResp : 'Text too long',
       responseType: target.responseType,
-      responseURL: target.responseURL.replace(target.response &&
-        target.responseURL.match(djatyRegId)[0], ''),
+      responseURL: target.responseURL.match(djatyRegId) ? target.responseURL
+        .replace(target.response && target.responseURL.match(djatyRegId)[0], '') :
+        target.responseURL,
       withCredentials: target.withCredentials,
     };
 
