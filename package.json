@@ -73,7 +73,7 @@
     "lint-staged": "^9.5.0",
     "main-bower-files": "^2.5.0",
     "sass-lint": "^1.10.2",
-    "semantic-release": "^15.13.31",
+    "semantic-release": "^17.2.3",
     "wiredep": "^2.2.2",
     "xo": "^0.12.0"
   },
