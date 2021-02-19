@@ -160,6 +160,10 @@
         if (!Djaty.trackingApp.trackers[item.itemType]) {
           const itemIndex = Djaty.initApp.timeline.indexOf(item);
 
+          if (itemIndex === -1) {
+            return;
+          }
+
           Djaty.initApp.timeline.splice(itemIndex, 1);
           Djaty.trackingApp._formatInitAppTimelineItems(itemIndex);
 

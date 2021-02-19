@@ -32,31 +32,45 @@ const ajaxTracker = {
    * @return {void}
    */
   timelineFormatter(item, cb) {
-    if (!Array.isArray(item.reqArgs)) {
-      throw new Error('Make sure you pass "reqArgs" parameter as an array');
-    }
-
-    if (typeof item.headers !== 'object') {
-      throw new Error('Make sure you pass "headers" parameter as an object');
-    }
-
-    // Handle `pending` items
-    if (item.state === 'pending') {
-      if (typeof item.ajaxCookie !== 'string') {
-        throw new Error('Make sure you pass "ajaxCookie" parameter as an string');
+    try {
+      if (!Array.isArray(item.reqArgs)) {
+        Djaty.logger.log('item', item);
+        throw new Error('Make sure you pass "reqArgs" parameter as an array');
       }
 
-      this._formatTimelinePendingObj(item, cb);
+      if (typeof item.headers !== 'object') {
+        throw new Error('Make sure you pass "headers" parameter as an object');
+      }
 
-      return;
+      // Handle `pending` items
+      if (item.state === 'pending') {
+        if (typeof item.ajaxCookie !== 'string') {
+          throw new Error('Make sure you pass "ajaxCookie" parameter as an string');
+        }
+
+        this._formatTimelinePendingObj(item, cb);
+
+        return;
+      }
+
+      if (!(item.ev instanceof Event && item.ev.type === 'readystatechange')) {
+        throw new Error('timelineFormatter only accept events of type \'readystatechange\'');
+      }
+
+      // Handle `finished` items
+      this._formatTimelineFinishedObj(item, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format ajax', {
+        originalItem: {
+          itemType: 'ajax',
+          state: item.state,
+          url: item.reqArgs[1],
+          method: item.reqArgs[0],
+          timestamp: item.time,
+        },
+      }, err);
+      cb({ isIgnored: true });
     }
-
-    if (!(item.ev instanceof Event && item.ev.type === 'readystatechange')) {
-      throw new Error('timelineFormatter only accept events of type \'readystatechange\'');
-    }
-
-    // Handle `finished` items
-    this._formatTimelineFinishedObj(item, cb);
   },
 
   /**

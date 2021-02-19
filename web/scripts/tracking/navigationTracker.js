@@ -31,10 +31,21 @@ const navigationTracker = {
    * @return {void}
    */
   timelineFormatter({ itemType, ev, url, time = Date.now() }, cb) {
-    if (typeof itemType !== 'string') {
-      throw new Error('Make sure you pass "itemType" parameter as a string');
+    try {
+      if (typeof itemType !== 'string') {
+        throw new Error('Make sure you pass "itemType" parameter as a string');
+      }
+      navigationTracker._formatTimelineObj({ attrName: itemType, ev, currentTime: time, url }, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format navigation', {
+        originalItem: {
+          itemType: 'navigation',
+          timestamp: time,
+          url,
+        },
+      }, err);
+      cb({ isIgnored: true });
     }
-    navigationTracker._formatTimelineObj({ attrName: itemType, ev, currentTime: time, url }, cb);
   },
 
   /* ###################################################################### */

@@ -40,7 +40,13 @@ Djaty.logger = Djaty.logger || {
           this._autoReportCb(this.logTimeline.slice(), args);
         }
 
-        if (!Djaty.config.debug && method !== 'error') {
+        if (this._autoReportCb && method === 'warn') {
+          // To avoid passing the reference of logger items during sending,
+          // Sending exact loggers items for each bug report.
+          this._autoReportCb(this.logTimeline.slice(), args, true);
+        }
+
+        if (!Djaty.config.debug && (method !== 'error' || method !== 'warn')) {
           return;
         }
 

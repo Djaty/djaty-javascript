@@ -38,10 +38,24 @@ const formTracker = {
   * @return void
   */
   timelineFormatter({ ev, time = Date.now() }, cb) {
-    if (!(Djaty.utils.isInstanceOf('Event', ev) && ev.type === 'submit')) {
-      throw new Error('timelineFormatter only accept events of type \'submit\'');
-    }
+    try {
+      if (!(Djaty.utils.isInstanceOf('Event', ev) && ev.type === 'submit')) {
+        throw new Error('timelineFormatter only accept events of type \'submit\'');
+      }
 
+      formTracker._timelineFormatter(ev, time, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format form', {
+        originalItem: {
+          itemType: 'form',
+          timestamp: time,
+        },
+      }, err);
+      cb({ isIgnored: true });
+    }
+  },
+
+  _timelineFormatter(ev, time, cb) {
     const inputs = [];
     let isPwdForm = false;
     const inputTypes = ['input', 'textarea', 'select'];
@@ -49,7 +63,7 @@ const formTracker = {
     Djaty.utils.forOwn(ev.target, (key, val) => {
       if (!(Djaty.utils.isDomElement(val) && inputTypes
           .some(type => val.nodeName.toLowerCase() === type) && val.type !== 'submit'
-          && !((val.type === 'radio' || val.type === 'checkbox') && !val.checked))) {
+        && !((val.type === 'radio' || val.type === 'checkbox') && !val.checked))) {
         return;
       }
 
