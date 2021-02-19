@@ -17,7 +17,7 @@ const autoReport = {
   exceptionFormattingCb: null,
   constData: null,
 
-  autoReport(loggerTimelineItems, logErrorParams) {
+  autoReport(loggerTimelineItems, logErrorParams, dontDestroy = false) {
     try {
       let errorMessage = 'Something went wrong with Djaty';
       if (!this.isInitiated) {
@@ -30,7 +30,9 @@ const autoReport = {
           ' please enable \'reportDjatyCrashes\' option. You may need to refresh the page' +
           ' to enable Djaty again as it\'s just exited to avoid unexpected behaviours';
 
-        Djaty.destroy(errorMessage);
+        if (!dontDestroy) {
+          Djaty.destroy(errorMessage);
+        }
 
         // eslint-disable-next-line no-console
         console.error(errorMessage);
@@ -40,7 +42,9 @@ const autoReport = {
 
       // I disable tracking to avoid reporting unneeded bugs with
       // corrupted state during reporting the original bug.
-      Djaty.initApp.destroy();
+      if (!dontDestroy) {
+        Djaty.initApp.destroy();
+      }
 
       const timeline = [];
       loggerTimelineItems.forEach(item => this.logsFormattingCb(item,
@@ -87,7 +91,9 @@ const autoReport = {
             ' enable Djaty again as it\'s just exited to avoid unexpected behaviours';
         }
 
-        Djaty.destroy(errorMessage);
+        if (!dontDestroy) {
+          Djaty.destroy(errorMessage);
+        }
 
         // eslint-disable-next-line no-console
         console.error(errorMessage);
@@ -112,13 +118,14 @@ const autoReport = {
 
     const logTimeline = Djaty.logger.logTimeline;
     const loggedErrors = logTimeline
-      .filter(item => item.method === 'error' || item.attrName === 'error');
+      .filter(item => item.method === 'error' || item.attrName === 'error' ||
+        item.method === 'warn' || item.attrName === 'warn');
 
     if (loggedErrors.length) {
       loggedErrors.forEach(item => {
         const tmpTimeline = logTimeline.slice(0, logTimeline.indexOf(item) + 1);
 
-        this.autoReport(tmpTimeline, item.args);
+        this.autoReport(tmpTimeline, item.args, item.method === 'warn' || item.attrName === 'warn');
       });
     }
 

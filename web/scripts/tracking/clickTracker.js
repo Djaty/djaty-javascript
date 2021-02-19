@@ -28,11 +28,22 @@ const clickTracker = {
    * @return {void}
    */
   timelineFormatter({ ev, time }, cb) {
-    if (!(Djaty.utils.isInstanceOf('Event', ev))) {
-      throw new Error('Make sure you pass "timelineFormatter" parameters correctly');
-    }
+    try {
+      if (!(Djaty.utils.isInstanceOf('Event', ev))) {
+        throw new Error('Make sure you pass "timelineFormatter" parameters correctly');
+      }
 
-    clickTracker._formatTimelineObj(ev, time, cb);
+      clickTracker._formatTimelineObj(ev, time, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format click', {
+        originalItem: {
+          itemType: 'click',
+          tagName: ev.target.nodeName.toLowerCase(),
+          timestamp: time,
+        },
+      }, err);
+      cb({ isIgnored: true });
+    }
   },
 
   /* ###################################################################### */

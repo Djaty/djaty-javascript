@@ -29,15 +29,26 @@ const consoleTracker = {
   * @return {void}
   */
   timelineFormatter({ attrName, args }, cb) {
-    if (typeof attrName !== 'string') {
-      throw new Error('Make sure you pass "attrName" parameter as a string');
-    }
+    try {
+      if (typeof attrName !== 'string') {
+        throw new Error('Make sure you pass "attrName" parameter as a string');
+      }
 
-    if (!Array.isArray(args)) {
-      throw new Error('Make sure you pass "args" parameter as an array');
-    }
+      if (!Array.isArray(args)) {
+        throw new Error('Make sure you pass "args" parameter as an array');
+      }
 
-    this._formatTimelineObj(attrName, args, cb);
+      this._formatTimelineObj(attrName, args, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format console', {
+        originalItem: {
+          itemType: 'console',
+          attrName,
+          timestamp: Date.now(),
+        },
+      }, err);
+      cb({ isIgnored: true });
+    }
   },
 
   /* ###################################################################### */

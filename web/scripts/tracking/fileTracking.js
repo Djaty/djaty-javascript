@@ -31,15 +31,27 @@ const fileTracker = {
    * @return {void}
    */
   timelineFormatter({ node, target, ev, time }, cb) {
-    if (typeof target !== 'string' || typeof ev !== 'string') {
-      throw new Error('Make sure you pass "timelineFormatter" parameters correctly');
-    }
+    try {
+      if (typeof target !== 'string' || typeof ev !== 'string') {
+        throw new Error('Make sure you pass "timelineFormatter" parameters correctly');
+      }
 
-    if (!Djaty.utils.isDomElement(node)) {
-      throw new Error('Make sure you pass "node" parameter as DOM element');
-    }
+      if (!Djaty.utils.isDomElement(node)) {
+        throw new Error('Make sure you pass "node" parameter as DOM element');
+      }
 
-    fileTracker._formatTimelineObj(node, target, ev, time, cb);
+      fileTracker._formatTimelineObj(node, target, ev, time, cb);
+    } catch (err) {
+      Djaty.logger.warn('Unable to format ajax', {
+        originalItem: {
+          itemType: 'file',
+          tagName: node.nodeName.toLowerCase(),
+          fileStatus: ev,
+          timestamp: time,
+        },
+      }, err);
+      cb({ isIgnored: true });
+    }
   },
 
   /* ###################################################################### */

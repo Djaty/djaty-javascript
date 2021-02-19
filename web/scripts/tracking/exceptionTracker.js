@@ -29,25 +29,36 @@ const exceptionTracker = {
    * @return {void}
    */
   timelineFormatter({ err = null, msg, time = Date.now() }, cb) {
-    if (typeof msg === 'string' && Djaty.trackingApp.isIgnoredError(msg)) {
-      cb({ isIgnored: true, type: 'error' });
-      return;
-    }
-
-    let frameList = [];
-
-    if (err && err.stack) {
-      frameList = err.stack.split('\n');
-
-      // Handle removing message from stacktrace except `Firefox`,
-      // it don't have a error message in his stacktrace.
-      const { userAgent } = Djaty.trackingApp.getAgentConstData();
-      if (userAgent.browser.name !== 'Firefox') {
-        frameList.shift();
+    try {
+      if (typeof msg === 'string' && Djaty.trackingApp.isIgnoredError(msg)) {
+        cb({ isIgnored: true, type: 'error' });
+        return;
       }
-    }
 
-    exceptionTracker._formatTimelineObj(err, msg, frameList, time, cb);
+      let frameList = [];
+
+      if (err && err.stack) {
+        frameList = err.stack.split('\n');
+
+        // Handle removing message from stacktrace except `Firefox`,
+        // it don't have a error message in his stacktrace.
+        const { userAgent } = Djaty.trackingApp.getAgentConstData();
+        if (userAgent.browser.name !== 'Firefox') {
+          frameList.shift();
+        }
+      }
+
+      exceptionTracker._formatTimelineObj(err, msg, frameList, time, cb);
+    } catch (formattingErr) {
+      Djaty.logger.warn('Unable to format exception', {
+        originalItem: {
+          itemType: 'exception',
+          msg,
+          timestamp: time,
+        },
+      }, formattingErr);
+      cb({ isIgnored: true });
+    }
   },
 
   /* ###################################################################### */
