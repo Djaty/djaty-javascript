@@ -14,7 +14,7 @@
 ```
 
 ## Usage
-- [Official Javascript SDK Docs](https://djaty.com/docs/SDKs/frontendJs/index.html)
+- [Official Djaty Javascript SDK Docs](https://djaty.com/docs/SDKs/frontendJs/index.html)
 
 ## Quick Start
 You can start using Djaty Javascript SDK with [the default configuration](https://djaty.com/docs/SDKs/frontendJs/configuring.html#default-mode)
