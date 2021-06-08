@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/Djaty/djaty-javascript/compare/v1.0.0...v1.0.1) (2021-06-08)
+
+
+### Bug Fixes
+
+* **readme:** readability ([247f0c4](https://github.com/Djaty/djaty-javascript/commit/247f0c4b06659cada6b764cda8bc4584a85cfad7))
+
 # 1.0.0 (2020-12-13)
 
 
