@@ -68,7 +68,7 @@ const clickTracker = {
       return cb({ isIgnored: true });
     }
 
-    let elementPath = this.getElementPath(ev.target).slice(3);
+    let elementPath = this.getElementPath(ev.target).slice(0, -3);
 
     // Ignore clicks without parent elements.
     if (!elementPath || elementPath === ev.target.nodeName.toLowerCase()) {
@@ -76,8 +76,7 @@ const clickTracker = {
     }
 
     if (elementPath.length >= Djaty.constants.elementPathMaxLength) {
-      elementPath = elementPath
-        .slice(Djaty.constants.elementPathMaxLength - elementPath.length - 1);
+      elementPath = elementPath.slice(0, Djaty.constants.elementPathMaxLength);
     }
 
     const formattedObj = {
@@ -104,10 +103,10 @@ const clickTracker = {
     if (elNumber === 1) {
       elClassList += el.type ? `[type=${el.type}]` : '';
       elClassList += el.name ? `[name=${el.name}]` : '';
-      elClassList += el.innerText ? `[text=${el.innerText.trim().slice(0, 20)}]` : '';
+      elClassList += el.innerText ? `[text=${el.innerText.trim().slice(0, 50)}]` : '';
     }
 
-    return `${this.getElementPath(el.parentElement, ++elNumber)} > ${elName}${elClassList}`;
+    return `${elName}${elClassList} < ${this.getElementPath(el.parentElement, ++elNumber)}`;
   },
 };
 

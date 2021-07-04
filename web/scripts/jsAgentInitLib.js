@@ -749,7 +749,7 @@
         // const reqMap = ajaxTracker.reqMap;
         // reqMap.push({xhr: this, reqId});
 
-        if (Djaty.config.trackingOptions.hasBackendIntegration) {
+        if (Djaty.config.trackingOptions.hasBackendIntegration && args[1]) {
           args[1] += args[1].match(/\?/) ? '&' : '?';
           args[1] += `djatyReqId=${requestId}`;
         }
@@ -937,6 +937,11 @@
      * @private
      */
     _isDjatyAjax(url, requestHeaders) {
+      // Don't track ajax with empty URLS or null
+      if (!url) {
+        return true;
+      }
+
       // Don't track our requests.
       const escapedApiURL = `${Djaty.config.bugsURL}${Djaty.config.api}${Djaty.config.apiBugsUrl}`
         .replace(/\//g, '\\/')
