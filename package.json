@@ -74,7 +74,7 @@
     "main-bower-files": "^2.5.0",
     "sass-lint": "^1.10.2",
     "semantic-release": "^17.2.3",
-    "wiredep": "^2.2.2",
+    "wiredep": "^4.0.0",
     "xo": "^0.12.0"
   },
   "eslintConfig": {
